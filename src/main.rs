@@ -1,0 +1,72 @@
+extern crate docopt;
+
+//#[macro_use]
+//mod enums;
+
+use docopt::Docopt;
+//use enums::quarter;
+use std::process::Command;
+
+const VERSION: &'static str = "0.1.0";
+const USAGE: &'static str = "
+Ledgerexport-tax.
+
+Usage:
+    ledgerexport-tax --file=<file_name> --quarter=<1|2|3|4>
+    ledgerplot --help
+    ledgerplot --version
+
+Options:
+    --file=<file_name>          Ledger dat filename to use.
+    --quarter=<1|2|3|4>         Export data for the given quarter of the current year.
+    -h --help                   Show this screen.
+    --version                   Show version.
+";
+//const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
+
+fn main()
+{
+    let args = Docopt::new(USAGE)
+        .and_then(|dopt| dopt.parse())
+        .unwrap_or_else(|e| e.exit());
+
+    if args.get_bool("--version")
+    {
+        println!("Ledgerexport-tax v{}", VERSION);
+    }
+    else
+    {
+        let file = args.get_str("--file");
+        if file.len() > 0
+        {
+            let quarter = args.get_str("--quarter").parse::<i32>().unwrap();
+            if (1..4).contains(&quarter)
+            {
+                export_data(file, quarter)
+            }
+            else
+            {
+                println!("Error parsing quarter: {}", quarter)
+            }
+        }
+    }
+    std::process::exit(0);
+}
+
+fn export_data(afile: &str, aquarter: i32)
+{
+    println!("TEST - prepare_data: {} for plot {:?}", afile, aquarter);
+    /*if aplot_type == plot::PlotType::IncomeVsExpenses
+    {
+      println!("PlotType enum = {:?}", aplot_type);
+      // TODO: period must be a parameter
+      // TODO: The below does not work.
+      let output = Command::new(format!(CMD_INCOMEVSEXPENSES_INCOME, file=afile, period="--startyear=2014 --endyear=2019"))
+          //.arg("Hello world")
+          .output()
+          .expect("Failed to execute ledger command.");
+      println!("After command");
+      assert_eq!(b"Hello world\n", output.stdout.as_slice());
+      println!("After2 command");
+    }*/
+}
