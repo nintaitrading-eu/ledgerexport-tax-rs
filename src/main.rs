@@ -9,18 +9,19 @@ use std::process::Command;
 
 const VERSION: &'static str = "0.1.0";
 const USAGE: &'static str = "
-Ledgerexport-tax.
+Ledgerexport-tax
 
 Usage:
-    ledgerexport-tax --file=<file_name> --quarter=<1|2|3|4>
-    ledgerplot --help
-    ledgerplot --version
+    ledgerexport-tax --file=<file_name> --quarter=<1|2|3|4> [--year=<year>]
+    ledgerexport-tax (-h | --help)
+    ledgerexport-tax --version
 
 Options:
-    --file=<file_name>          Ledger dat filename to use.
-    --quarter=<1|2|3|4>         Export data for the given quarter of the current year.
-    -h --help                   Show this screen.
-    --version                   Show version.
+    --file=<file_name>  Ledger dat filename to use.
+    --quarter=<quarter>  Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
+    --year=<year>  Optional year. If no year is given, the current year is used.
+    -h --help  Show this screen.
+    --version  Show version.
 ";
 //const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 
@@ -29,6 +30,7 @@ fn main()
     let args = Docopt::new(USAGE)
         .and_then(|dopt| dopt.parse())
         .unwrap_or_else(|e| e.exit());
+    println!("{:?}", args);
 
     if args.get_bool("--version")
     {
@@ -37,6 +39,9 @@ fn main()
     else
     {
         let file = args.get_str("--file");
+        let year = args.get_str("--year").parse::<i32>().unwrap();
+        println!("Year = {}", year);
+
         if file.len() > 0
         {
             let quarter = args.get_str("--quarter").parse::<i32>().unwrap();
