@@ -30,7 +30,9 @@ fn main()
     let args = Docopt::new(USAGE)
         .and_then(|dopt| dopt.parse())
         .unwrap_or_else(|e| e.exit());
+    println!("--------- BEGIN DEBUG ------------");
     println!("{:?}", args);
+    println!("--------- END DEBUG ------------");
 
     if args.get_bool("--version")
     {
@@ -40,14 +42,14 @@ fn main()
     {
         let file = args.get_str("--file");
         let year = args.get_str("--year").parse::<i32>().unwrap();
-        println!("Year = {}", year);
+        println!("Year = {:?}", year);
 
         if file.len() > 0
         {
             let quarter = args.get_str("--quarter").parse::<i32>().unwrap();
-            if (1..4).contains(&quarter)
+            if (1..5).contains(&quarter)
             {
-                export_data(file, quarter)
+                export_data(file, quarter, year)
             }
             else
             {
@@ -58,9 +60,15 @@ fn main()
     std::process::exit(0);
 }
 
-fn export_data(afile: &str, aquarter: i32)
+fn get_daterange_from_quarter(aquarter: i32, ayear: i32)
 {
-    println!("TEST - prepare_data: {} for plot {:?}", afile, aquarter);
+    println!("aquarter = {}, ayear = {}", aquarter, ayear);
+}
+
+fn export_data(afile: &str, aquarter: i32, ayear: i32)
+{
+    println!("TEST - prepare_data: {} for plot {:?} and year {:?}", afile, aquarter, ayear);
+    get_daterange_from_quarter(aquarter, ayear);
     /*if aplot_type == plot::PlotType::IncomeVsExpenses
     {
       println!("PlotType enum = {:?}", aplot_type);
