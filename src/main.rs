@@ -5,6 +5,7 @@ extern crate docopt;
 
 use docopt::Docopt;
 //use enums::quarter;
+use std::io::ErrorKind;
 use std::process::Command;
 
 const VERSION: &'static str = "0.1.0";
@@ -41,7 +42,11 @@ fn main()
     else
     {
         let file = args.get_str("--file");
-        let year = args.get_str("--year").parse::<i32>().unwrap();
+        // TODO: can't do unwrap when empty.
+        let year = match args.get_str("--year").parse::<i32>() {
+            Ok(num) => num,
+            Err(_) => 2019 /* Change to current year */,
+        };
         println!("Year = {:?}", year);
 
         if file.len() > 0
