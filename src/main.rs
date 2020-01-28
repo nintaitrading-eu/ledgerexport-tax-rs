@@ -69,15 +69,21 @@ fn main()
     std::process::exit(1);
 }
 
-fn get_daterange_from_quarter(aquarter: i32, ayear: i32)
+fn get_daterange_from_quarter(aquarter: i32, ayear: i32) -> String
 {
-    println!("aquarter = {}, ayear = {}", aquarter, ayear);
+    match aquarter {
+        1 => format!("-b {}-01-01 -e {}-04-01", ayear, ayear),
+        2 => format!("-b {}-04-01 -e {}-07-01", ayear, ayear),
+        3 => format!("-b {}-07-01 -e {}-10-01", ayear, ayear),
+        4 => format!("-b {}-10-01 -e {}-01-01", ayear, ayear + 1),
+        _ => panic!("The function get_daterange_from_quarter is not supposed to have a wrong quarter, something is wrong."),
+    }
 }
 
 fn export_data(afile: &str, aquarter: i32, ayear: i32)
 {
-    println!("TEST - prepare_data: {} for plot {:?} and year {:?}", afile, aquarter, ayear);
-    get_daterange_from_quarter(aquarter, ayear);
+    let daterange = get_daterange_from_quarter(aquarter, ayear);
+    println!("Daterange = {}", daterange);
     /*if aplot_type == plot::PlotType::IncomeVsExpenses
     {
       println!("PlotType enum = {:?}", aplot_type);
