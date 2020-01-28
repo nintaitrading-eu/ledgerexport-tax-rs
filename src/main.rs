@@ -46,24 +46,27 @@ fn main()
         let current_year: i32 = Utc::now().year();
         let year = match args.get_str("--year").parse::<i32>() {
             Ok(num) => num,
-            Err(_) => current_year, /* Change to current year */
+            Err(_) => current_year,
         };
-        println!("Year = {:?}", year);
 
         if file.len() > 0
         {
-            let quarter = args.get_str("--quarter").parse::<i32>().unwrap();
+            let quarter = match args.get_str("--quarter").parse::<i32>() {
+                Ok(num) => num,
+                Err(_) => -1,
+            };
             if (1..5).contains(&quarter)
             {
-                export_data(file, quarter, year)
+                export_data(file, quarter, year);
+                std::process::exit(0);
             }
             else
             {
-                println!("Error parsing quarter: {}", quarter)
+                println!("Invalid quarter: {}", quarter)
             }
         }
     }
-    std::process::exit(0);
+    std::process::exit(1);
 }
 
 fn get_daterange_from_quarter(aquarter: i32, ayear: i32)
