@@ -5,3 +5,4 @@ authors = ["Andy Nagels <thereisanewway@gmail.com>"]
 
 [dependencies]
 docopt = "1"
+chrono = "0.4"

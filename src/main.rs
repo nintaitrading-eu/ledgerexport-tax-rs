@@ -1,12 +1,13 @@
 extern crate docopt;
+extern crate chrono;
 
 //#[macro_use]
 //mod enums;
 
 use docopt::Docopt;
 //use enums::quarter;
-use std::io::ErrorKind;
 use std::process::Command;
+use chrono::prelude::{Utc, Datelike};
 
 const VERSION: &'static str = "0.1.0";
 const USAGE: &'static str = "
@@ -42,10 +43,10 @@ fn main()
     else
     {
         let file = args.get_str("--file");
-        // TODO: can't do unwrap when empty.
+        let current_year: i32 = Utc::now().year();
         let year = match args.get_str("--year").parse::<i32>() {
             Ok(num) => num,
-            Err(_) => 2019 /* Change to current year */,
+            Err(_) => current_year, /* Change to current year */
         };
         println!("Year = {:?}", year);
 
