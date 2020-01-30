@@ -44,16 +44,18 @@ fn main()
     else
     {
         let file = args.get_str("--file");
-        
+
         let current_year: i32 = Utc::now().year();
-        let year = match args.get_str("--year").parse::<i32>() {
+        let year = match args.get_str("--year").parse::<i32>()
+        {
             Ok(num) => num,
             Err(_) => current_year,
         };
 
         if (file.len() > 0) && Path::new(file).exists()
         {
-            let quarter = match args.get_str("--quarter").parse::<i32>() {
+            let quarter = match args.get_str("--quarter").parse::<i32>()
+            {
                 Ok(num) => num,
                 Err(_) => -1,
             };
