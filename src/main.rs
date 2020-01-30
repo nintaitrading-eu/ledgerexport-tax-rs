@@ -8,6 +8,7 @@ use docopt::Docopt;
 //use enums::quarter;
 use std::process::Command;
 use chrono::prelude::{Utc, Datelike};
+use std::path::Path;
 
 const VERSION: &'static str = "0.1.0";
 const USAGE: &'static str = "
@@ -43,13 +44,14 @@ fn main()
     else
     {
         let file = args.get_str("--file");
+        
         let current_year: i32 = Utc::now().year();
         let year = match args.get_str("--year").parse::<i32>() {
             Ok(num) => num,
             Err(_) => current_year,
         };
 
-        if file.len() > 0
+        if (file.len() > 0) && Path::new(file).exists()
         {
             let quarter = match args.get_str("--quarter").parse::<i32>() {
                 Ok(num) => num,
@@ -64,6 +66,10 @@ fn main()
             {
                 println!("Invalid quarter: {}", quarter)
             }
+        }
+        else
+        {
+            println!("File {} not found.", file);
         }
     }
     std::process::exit(1);
