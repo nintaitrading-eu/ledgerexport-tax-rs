@@ -96,19 +96,14 @@ fn export_data(afile: &str, aquarter: i32, ayear: i32)
     //--strict -X -EUR -H {daterange} reg | sort -n
     let daterange = get_daterange_from_quarter(aquarter, ayear);
     println!("Daterange = {}", daterange);
-    let command = format!("ledger -f {} --strict -X -EUR -H {} reg", afile, daterange);
-    println!("Command = {}", command);
-    /*if aplot_type == plot::PlotType::IncomeVsExpenses
-    {
-      println!("PlotType enum = {:?}", aplot_type);
-      // TODO: period must be a parameter
-      // TODO: The below does not work.
-      let output = Command::new(format!(CMD_INCOMEVSEXPENSES_INCOME, file=afile, period="--startyear=2014 --endyear=2019"))
-          //.arg("Hello world")
-          .output()
-          .expect("Failed to execute ledger command.");
-      println!("After command");
-      assert_eq!(b"Hello world\n", output.stdout.as_slice());
-      println!("After2 command");
-    }*/
+    /*let command: String = format!(
+        //"ledger -f ./{} --strict -X -EUR -H {} reg",
+        afile, daterange
+    );
+    println!("Command = {:?}", command);*/
+    let output = Command::new("ledger -f ./test.dat")
+        .arg("-lh")
+        .output()
+        .expect("Failed to execute process.");
+    println!("output = {}", String::from_utf8(output.stdout).unwrap());
 }
