@@ -77,13 +77,45 @@ fn main()
     std::process::exit(1);
 }
 
-fn get_daterange_from_quarter(aquarter: i32, ayear: i32) -> String
+fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) -> String
 {
     match aquarter {
-        1 => format!("-b {}-01-01 -e {}-04-01", ayear, ayear),
-        2 => format!("-b {}-04-01 -e {}-07-01", ayear, ayear),
-        3 => format!("-b {}-07-01 -e {}-10-01", ayear, ayear),
-        4 => format!("-b {}-10-01 -e {}-01-01", ayear, ayear + 1),
+        1 =>
+            if a_is_first_part
+            {
+                format!("{}-01-01", ayear)
+            }
+            else
+            {
+                format!("{}-04-01", ayear)
+            },
+        2 =>
+            if a_is_first_part
+            {
+                format!("{}-04-01", ayear)
+            }
+            else
+            {
+                format!("{}-07-01", ayear)
+            },
+        3 =>
+            if a_is_first_part
+            {
+                format!("{}-07-01", ayear)
+            }
+            else
+            {
+                format!("{}-10-01", ayear)
+            },
+                4 =>
+                    if a_is_first_part
+                    {
+                        format!("{}-10-01", ayear)
+                    }
+                    else
+                    {
+                        format!("{}-01-01", ayear + 1)
+                    },
         _ => panic!("The function get_daterange_from_quarter is not supposed to have a wrong quarter, something is wrong."),
     }
 }
@@ -94,13 +126,14 @@ fn export_data(afile: &str, aquarter: i32, ayear: i32)
     // Find a good way to use pipes?
     // Or do the sorting in rust?
     //--strict -X -EUR -H {daterange} reg | sort -n
-    let daterange = get_daterange_from_quarter(aquarter, ayear);
-    println!("Daterange = {}", daterange);
-    //let command: String = format!("-f ./{} --strict -X -EUR -H {} reg", afile, daterange);
-    /*println!("Command = {:?}", command);*/
-    println!("afile = {}", afile);
-    // TODO: rework get_daterange_from_quarter, so you can retrieve a specific part.
-    // TODO: daterange as seperate options
+    println!(
+        "first-part: {}",
+        get_daterange_from_quarter(aquarter, ayear, true)
+    );
+    println!(
+        "first-part: {}",
+        get_daterange_from_quarter(aquarter, ayear, false)
+    );
     let output = Command::new("ledger")
         .arg("-f")
         .arg(afile)
@@ -109,7 +142,10 @@ fn export_data(afile: &str, aquarter: i32, ayear: i32)
         .arg("-EUR")
         .arg("-H")
         .arg("reg")
-        //.arg(daterange)
+        .arg("-b")
+        .arg(get_daterange_from_quarter(aquarter, ayear, true))
+        .arg("-e")
+        .arg(get_daterange_from_quarter(aquarter, ayear, false))
         .output()
         .expect("Failed to execute process.");
     println!("output = {}", String::from_utf8(output.stdout).unwrap());
