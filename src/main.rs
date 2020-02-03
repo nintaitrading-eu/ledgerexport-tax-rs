@@ -96,13 +96,20 @@ fn export_data(afile: &str, aquarter: i32, ayear: i32)
     //--strict -X -EUR -H {daterange} reg | sort -n
     let daterange = get_daterange_from_quarter(aquarter, ayear);
     println!("Daterange = {}", daterange);
-    /*let command: String = format!(
-        //"ledger -f ./{} --strict -X -EUR -H {} reg",
-        afile, daterange
-    );
-    println!("Command = {:?}", command);*/
-    let output = Command::new("ledger -f ./test.dat")
-        .arg("-lh")
+    //let command: String = format!("-f ./{} --strict -X -EUR -H {} reg", afile, daterange);
+    /*println!("Command = {:?}", command);*/
+    println!("afile = {}", afile);
+    // TODO: rework get_daterange_from_quarter, so you can retrieve a specific part.
+    // TODO: daterange as seperate options
+    let output = Command::new("ledger")
+        .arg("-f")
+        .arg(afile)
+        .arg("--strict")
+        .arg("-X")
+        .arg("-EUR")
+        .arg("-H")
+        .arg("reg")
+        //.arg(daterange)
         .output()
         .expect("Failed to execute process.");
     println!("output = {}", String::from_utf8(output.stdout).unwrap());
