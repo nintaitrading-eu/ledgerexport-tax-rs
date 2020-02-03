@@ -90,8 +90,14 @@ fn get_daterange_from_quarter(aquarter: i32, ayear: i32) -> String
 
 fn export_data(afile: &str, aquarter: i32, ayear: i32)
 {
+    // TODO: add the following command.
+    // Find a good way to use pipes?
+    // Or do the sorting in rust?
+    //--strict -X -EUR -H {daterange} reg | sort -n
     let daterange = get_daterange_from_quarter(aquarter, ayear);
     println!("Daterange = {}", daterange);
+    let command = format!("ledger -f {} --strict -X -EUR -H {} reg", afile, daterange);
+    println!("Command = {}", command);
     /*if aplot_type == plot::PlotType::IncomeVsExpenses
     {
       println!("PlotType enum = {:?}", aplot_type);
