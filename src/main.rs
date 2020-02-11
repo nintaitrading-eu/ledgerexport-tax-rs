@@ -2,10 +2,10 @@ extern crate docopt;
 extern crate chrono;
 
 //#[macro_use]
-//mod enums;
+mod enums;
 
 use docopt::Docopt;
-//use enums::quarter;
+use enums::rt;
 use std::process::Command;
 use chrono::prelude::{Utc, Datelike};
 use std::path::Path;
@@ -15,12 +15,13 @@ const USAGE: &'static str = "
 Ledgerexport-tax
 
 Usage:
-    ledgerexport-tax --file=<file_name> --quarter=<1|2|3|4> [--year=<year>]
+    ledgerexport-tax --file=<file_name> --report=<bal|reg> --quarter=<1|2|3|4> [--year=<year>]
     ledgerexport-tax (-h | --help)
     ledgerexport-tax --version
 
 Options:
     --file=<file_name>  Ledger dat filename to use.
+    --report=<bal|reg>  Specify bal (balance) or reg (register) report type.
     --quarter=<quarter>  Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
     --year=<year>  Optional year. If no year is given, the current year is used.
     -h --help  Show this screen.
@@ -40,41 +41,42 @@ fn main()
     if args.get_bool("--version")
     {
         println!("Ledgerexport-tax v{}", VERSION);
+        std::process::exit(0);
     }
-    else
+
+    let file = args.get_str("--file");
+    if !(file.len() > 0) || !Path::new(file).exists()
     {
-        let file = args.get_str("--file");
+        println!("File {} not found.", file);
+        std::process::exit(1);
+    };
 
-        let current_year: i32 = Utc::now().year();
-        let year = match args.get_str("--year").parse::<i32>()
-        {
-            Ok(num) => num,
-            Err(_) => current_year,
-        };
+    let report_type = match args.get_str("--report").parse::<rt::ReportType>()
+    {
+        Ok(r) => r,
+        Err(_) => rt::ReportType::Balance,
+    };
 
-        if (file.len() > 0) && Path::new(file).exists()
-        {
-            let quarter = match args.get_str("--quarter").parse::<i32>()
-            {
-                Ok(num) => num,
-                Err(_) => -1,
-            };
-            if (1..5).contains(&quarter)
-            {
-                export_data(file, quarter, year);
-                std::process::exit(0);
-            }
-            else
-            {
-                println!("Invalid quarter: {}", quarter)
-            }
-        }
-        else
-        {
-            println!("File {} not found.", file);
-        }
+    let current_year: i32 = Utc::now().year();
+    let year = match args.get_str("--year").parse::<i32>()
+    {
+        Ok(num) => num,
+        Err(_) => current_year,
+    };
+
+    let quarter = match args.get_str("--quarter").parse::<i32>()
+    {
+        Ok(num) => num,
+        Err(_) => -1,
+    };
+    if !(1..5).contains(&quarter)
+    {
+        println!("Invalid quarter: {}", quarter);
+        std::process::exit(1);
     }
-    std::process::exit(1);
+
+    export_data(file, report_type, quarter, year);
+    std::process::exit(0);
 }
 
 fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) -> String
@@ -89,38 +91,38 @@ fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) 
             {
                 format!("{}-04-01", ayear)
             },
-        2 =>
-            if a_is_first_part
-            {
-                format!("{}-04-01", ayear)
-            }
-            else
-            {
-                format!("{}-07-01", ayear)
-            },
-        3 =>
-            if a_is_first_part
-            {
-                format!("{}-07-01", ayear)
-            }
-            else
-            {
-                format!("{}-10-01", ayear)
-            },
-                4 =>
+                2 =>
                     if a_is_first_part
                     {
-                        format!("{}-10-01", ayear)
+                        format!("{}-04-01", ayear)
                     }
                     else
                     {
-                        format!("{}-01-01", ayear + 1)
+                        format!("{}-07-01", ayear)
                     },
-        _ => panic!("The function get_daterange_from_quarter is not supposed to have a wrong quarter, something is wrong."),
+                        3 =>
+                            if a_is_first_part
+                            {
+                                format!("{}-07-01", ayear)
+                            }
+                            else
+                            {
+                                format!("{}-10-01", ayear)
+                            },
+                                4 =>
+                                    if a_is_first_part
+                                    {
+                                        format!("{}-10-01", ayear)
+                                    }
+                                    else
+                                    {
+                                        format!("{}-01-01", ayear + 1)
+                                    },
+                                        _ => panic!("The function get_daterange_from_quarter is not supposed to have a wrong quarter, something is wrong."),
     }
 }
 
-fn export_data(afile: &str, aquarter: i32, ayear: i32)
+fn export_data(afile: &str, areport_type: rt::ReportType, aquarter: i32, ayear: i32)
 {
     // TODO: add the following command.
     // Find a good way to use pipes?
@@ -141,7 +143,8 @@ fn export_data(afile: &str, aquarter: i32, ayear: i32)
         .arg("-X")
         .arg("-EUR")
         .arg("-H")
-        .arg("reg")
+        //.arg(areport_type.toString)  // TODO: Find a way to convert Balance to bal
+        .arg("bal")
         .arg("-b")
         .arg(get_daterange_from_quarter(aquarter, ayear, true))
         .arg("-e")
