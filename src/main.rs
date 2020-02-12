@@ -54,7 +54,10 @@ fn main()
     let report_type = match args.get_str("--report").parse::<rt::ReportType>()
     {
         Ok(r) => r,
-        Err(_) => rt::ReportType::Balance,
+        Err(_) => {
+          println!("Invalid report type {}.", args.get_str("--report"));
+          std::process::exit(1);
+        },
     };
 
     let current_year: i32 = Utc::now().year();
@@ -67,7 +70,10 @@ fn main()
     let quarter = match args.get_str("--quarter").parse::<i32>()
     {
         Ok(num) => num,
-        Err(_) => -1,
+        Err(_) => {
+          println!("Invalid quarter {}.", args.get_str("--quarter"));
+          std::process::exit(1);
+        },
     };
     if !(1..5).contains(&quarter)
     {
