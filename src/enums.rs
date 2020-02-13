@@ -1,6 +1,7 @@
 pub mod rt
 {
     use std::str::FromStr;
+    use std::fmt::{self, Debug};
 
     #[derive(Debug, PartialEq)]
     pub enum ReportType
@@ -23,6 +24,14 @@ pub mod rt
                 "reg" => Ok(ReportType::Register),
                 _ => Err(()),
             }
+        }
+    }
+
+    impl fmt::Display for ReportType
+    {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
+        {
+            fmt::Debug::fmt(self, f)
         }
     }
 }

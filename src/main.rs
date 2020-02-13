@@ -149,8 +149,7 @@ fn export_data(afile: &str, areport_type: rt::ReportType, aquarter: i32, ayear: 
         .arg("-X")
         .arg("-EUR")
         .arg("-H")
-        //.arg(areport_type.toString)  // TODO: Find a way to convert Balance to bal
-        .arg("bal")
+        .arg(areport_type.to_string())
         .arg("-b")
         .arg(get_daterange_from_quarter(aquarter, ayear, true))
         .arg("-e")
