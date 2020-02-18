@@ -1,7 +1,3 @@
-extern crate docopt;
-extern crate chrono;
-
-//#[macro_use]
 mod enums;
 
 use docopt::Docopt;
@@ -9,6 +5,8 @@ use enums::rt;
 use std::process::Command;
 use chrono::prelude::{Utc, Datelike};
 use std::path::Path;
+#[allow(unused_imports)]
+use contracts::{pre, post};
 
 const VERSION: &'static str = "0.1.0";
 const USAGE: &'static str = "
@@ -54,10 +52,11 @@ fn main()
     let report_type = match args.get_str("--report").parse::<rt::ReportType>()
     {
         Ok(r) => r,
-        Err(_) => {
-          println!("Invalid report type {}.", args.get_str("--report"));
-          std::process::exit(1);
-        },
+        Err(_) =>
+        {
+            println!("Invalid report type {}.", args.get_str("--report"));
+            std::process::exit(1);
+        }
     };
 
     let current_year: i32 = Utc::now().year();
@@ -70,10 +69,11 @@ fn main()
     let quarter = match args.get_str("--quarter").parse::<i32>()
     {
         Ok(num) => num,
-        Err(_) => {
-          println!("Invalid quarter {}.", args.get_str("--quarter"));
-          std::process::exit(1);
-        },
+        Err(_) =>
+        {
+            println!("Invalid quarter {}.", args.get_str("--quarter"));
+            std::process::exit(1);
+        }
     };
     if !(1..5).contains(&quarter)
     {
@@ -85,46 +85,25 @@ fn main()
     std::process::exit(0);
 }
 
+#[pre(aquarter > 0, "aquarter should be a positive integer")]
+#[pre(ayear > 0, "ayear should be a positive integer")]
+#[post(!ret.is_empty(), "get_daterange_from_quarter should return a non-empty string")]
 fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) -> String
 {
-    match aquarter {
-        1 =>
-            if a_is_first_part
-            {
-                format!("{}-01-01", ayear)
-            }
-            else
-            {
-                format!("{}-04-01", ayear)
-            },
-                2 =>
-                    if a_is_first_part
-                    {
-                        format!("{}-04-01", ayear)
-                    }
-                    else
-                    {
-                        format!("{}-07-01", ayear)
-                    },
-                        3 =>
-                            if a_is_first_part
-                            {
-                                format!("{}-07-01", ayear)
-                            }
-                            else
-                            {
-                                format!("{}-10-01", ayear)
-                            },
-                                4 =>
-                                    if a_is_first_part
-                                    {
-                                        format!("{}-10-01", ayear)
-                                    }
-                                    else
-                                    {
-                                        format!("{}-01-01", ayear + 1)
-                                    },
-                                        _ => panic!("The function get_daterange_from_quarter is not supposed to have a wrong quarter, something is wrong."),
+    let arr_month_begin = ["01", "04", "07", "10"];
+    let arr_month_end = ["04", "07", "10", "01"];
+    let mut year = ayear;
+    if (aquarter == 4) && !a_is_first_part
+    {
+        year = ayear + 1;
+    }
+    if a_is_first_part
+    {
+        format!("{}-{}-01", year, arr_month_begin[(aquarter - 1) as usize])
+    }
+    else
+    {
+        format!("{}-{}-01", year, arr_month_end[(aquarter - 1) as usize])
     }
 }
 
@@ -157,4 +136,19 @@ fn export_data(afile: &str, areport_type: rt::ReportType, aquarter: i32, ayear: 
         .output()
         .expect("Failed to execute process.");
     println!("output = {}", String::from_utf8(output.stdout).unwrap());
+}
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+
+    #[test]
+    fn test_daterange_from_quarter()
+    {
+        assert_eq!(get_daterange_from_quarter(1, 2019, true), "2019-01-01");
+        assert_eq!(get_daterange_from_quarter(1, 2019, false), "2019-04-01");
+        assert_eq!(get_daterange_from_quarter(4, 2020, true), "2020-10-01");
+        assert_eq!(get_daterange_from_quarter(4, 2020, false), "2021-01-01");
+    }
 }
