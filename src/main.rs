@@ -107,6 +107,10 @@ fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) 
     }
 }
 
+#[pre(!afile.is_empty(), "afile should not be empty")]
+#[pre(aquarter > 0, "aquarter should be a positive integer")]
+#[pre(ayear > 0, "ayear should be a positive integer")]
+#[pre((areport_type == rt::ReportType::Balance) || (areport_type == rt::ReportType::Register), "areport_type should be one of the known values")]
 fn export_data(afile: &str, areport_type: rt::ReportType, aquarter: i32, ayear: i32)
 {
     // TODO: add the following command.
