@@ -35,3 +35,41 @@ pub mod rt
         }
     }
 }
+
+pub mod ot
+{
+    use std::str::FromStr;
+    use std::fmt::{self, Debug};
+
+    #[derive(Debug, PartialEq)]
+    pub enum OutputType
+    {
+        Stdout,
+        Txt,
+        Pdf
+    }
+
+    impl FromStr for OutputType 
+    {
+        type Err = ();
+
+        fn from_str(a_str: &str) -> Result<Self, Self::Err>
+        {
+            match a_str
+            {
+                "stdout" => Ok(OutputType::Stdout),
+                "txt" => Ok(OutputType::Txt),
+                "pdf" => Ok(OutputType::Pdf),
+                _ => Err(()),
+            }
+        }
+    }
+
+    impl fmt::Display for OutputType
+    {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
+        {
+            fmt::Debug::fmt(self, f)
+        }
+    }
+}

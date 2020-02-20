@@ -1,7 +1,7 @@
 mod enums;
 
 use docopt::Docopt;
-use enums::rt;
+use enums::{rt, ot};
 use std::process::Command;
 use chrono::prelude::{Utc, Datelike};
 use std::path::Path;
@@ -13,13 +13,14 @@ const USAGE: &'static str = "
 Ledgerexport-tax
 
 Usage:
-    ledgerexport-tax --file=<file_name> --report=<bal|reg> --quarter=<1|2|3|4> [--year=<year>]
+    ledgerexport-tax --file=<file_name> --report=<bal|reg> [--output=<stdout|txt|pdf>] --quarter=<1|2|3|4> [--year=<year>]
     ledgerexport-tax (-h | --help)
     ledgerexport-tax --version
 
 Options:
     --file=<file_name>  Ledger dat filename to use.
     --report=<bal|reg>  Specify bal (balance) or reg (register) report type.
+    --output=<stdout|txt|pdf> Specify the output, stdout is the default.
     --quarter=<quarter>  Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
     --year=<year>  Optional year. If no year is given, the current year is used.
     -h --help  Show this screen.
@@ -55,6 +56,16 @@ fn main()
         Err(_) =>
         {
             println!("Invalid report type {}.", args.get_str("--report"));
+            std::process::exit(1);
+        }
+    };
+
+    let output = match args.get_str("--output").parse::<ot::OutputType>()
+    {
+        Ok(o) => o,
+        Err(_) =>
+        {
+            println!("Invalid output type {}.", args.get_str("--output"));
             std::process::exit(1);
         }
     };
