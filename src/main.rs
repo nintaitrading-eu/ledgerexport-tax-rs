@@ -7,20 +7,23 @@ use chrono::prelude::{Utc, Datelike};
 use std::path::Path;
 #[allow(unused_imports)]
 use contracts::{pre, post};
+use printpdf::*;
+use std::fs::File;
+use std::io::BufWriter;
 
 const VERSION: &'static str = "0.1.0";
 const USAGE: &'static str = "
 Ledgerexport-tax
 
 Usage:
-    ledgerexport-tax --file=<file_name> --report=<bal|reg> [--output=<stdout|txt|pdf>] --quarter=<1|2|3|4> [--year=<year>]
+    ledgerexport-tax --file=<file_name> --report=<bal|reg> --quarter=<1|2|3|4> [--year=<year>] [--output=<stdout|txt|pdf>]
     ledgerexport-tax (-h | --help)
     ledgerexport-tax --version
 
 Options:
     --file=<file_name>  Ledger dat filename to use.
     --report=<bal|reg>  Specify bal (balance) or reg (register) report type.
-    --output=<stdout|txt|pdf> Specify the output, stdout is the default.
+    --output=<stdout|txt|pdf>  Specify the output, stdout is the default.
     --quarter=<quarter>  Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
     --year=<year>  Optional year. If no year is given, the current year is used.
     -h --help  Show this screen.
@@ -60,7 +63,7 @@ fn main()
         }
     };
 
-    let output = match args.get_str("--output").parse::<ot::OutputType>()
+    let output_type = match args.get_str("--output").parse::<ot::OutputType>()
     {
         Ok(o) => o,
         Err(_) =>
@@ -92,7 +95,7 @@ fn main()
         std::process::exit(1);
     }
 
-    export_data(file, report_type, quarter, year);
+    export_data(file, output_type, report_type, quarter, year);
     std::process::exit(0);
 }
 
@@ -122,7 +125,13 @@ fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) 
 #[pre(aquarter > 0, "aquarter should be a positive integer")]
 #[pre(ayear > 0, "ayear should be a positive integer")]
 #[pre((areport_type == rt::ReportType::Balance) || (areport_type == rt::ReportType::Register), "areport_type should be one of the known values")]
-fn export_data(afile: &str, areport_type: rt::ReportType, aquarter: i32, ayear: i32)
+fn export_data(
+    afile: &str,
+    aoutput_type: ot::OutputType,
+    areport_type: rt::ReportType,
+    aquarter: i32,
+    ayear: i32,
+)
 {
     // TODO: add the following command.
     // Find a good way to use pipes?
@@ -151,6 +160,15 @@ fn export_data(afile: &str, areport_type: rt::ReportType, aquarter: i32, ayear: 
         .output()
         .expect("Failed to execute process.");
     println!("output = {}", String::from_utf8(output.stdout).unwrap());
+    generate_pdf(afile);
+}
+
+fn generate_pdf(afile: &str)
+{
+    let (doc, page1, layer1) = PdfDocument::new("my_title", Mm(247.0), Mm(210.0), "layer_1");
+    let (page2, layer1) = doc.add_page(Mm(10.0), Mm(250.0), "page2_layer_2");
+    doc.save(&mut BufWriter::new(File::create("test.pdf").unwrap()))
+        .unwrap();
 }
 
 #[cfg(test)]
