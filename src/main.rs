@@ -159,14 +159,34 @@ fn export_data(
         .arg(get_daterange_from_quarter(aquarter, ayear, false))
         .output()
         .expect("Failed to execute process.");
-    println!("output = {}", String::from_utf8(output.stdout).unwrap());
-    generate_pdf(afile);
+    let mut output_string = String::from_utf8(output.stdout).unwrap();
+    println!("output = {}", &output_string);
+    println!("output = {}", output_string);
+    generate_pdf(afile, &output_string);
 }
 
-fn generate_pdf(afile: &str)
+fn generate_pdf(afile: &str, aoutput: &str)
 {
-    let (doc, page1, layer1) = PdfDocument::new("my_title", Mm(247.0), Mm(210.0), "layer_1");
-    let (page2, layer1) = doc.add_page(Mm(10.0), Mm(250.0), "page2_layer_2");
+    let (doc, page1, layer1) = PdfDocument::new("report", Mm(210.0), Mm(297.0), "layer_1");
+    let current_layer = doc.get_page(page1).get_layer(layer1);
+    let font = doc
+        .add_external_font(
+            File::open("/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf").unwrap(),
+        )
+        .unwrap();
+    let text = "aeitonfweitqnoifwtnfo";
+    current_layer.use_text(text, 24, Mm(20.0), Mm(20.0), &font);
+    current_layer.begin_text_section();
+    current_layer.set_font(&font, 33);
+    current_layer.set_text_cursor(Mm(10.0), Mm(10.0));
+    current_layer.set_line_height(33);
+    current_layer.set_word_spacing(3000);
+    current_layer.set_character_spacing(10);
+    current_layer.set_text_rendering_mode(TextRenderingMode::Stroke);
+    current_layer.write_text(aoutput.clone(), &font);
+    current_layer.set_line_offset(10);
+    current_layer.write_text(aoutput.clone(), &font);
+    current_layer.end_text_section();
     doc.save(&mut BufWriter::new(File::create("test.pdf").unwrap()))
         .unwrap();
 }
