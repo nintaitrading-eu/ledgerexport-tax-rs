@@ -145,6 +145,7 @@ fn export_data(
         "first-part: {}",
         get_daterange_from_quarter(aquarter, ayear, false)
     );
+    println!("report_type = {}", areport_type.to_string());
     let output = Command::new("ledger")
         .arg("-f")
         .arg(afile)
@@ -152,7 +153,8 @@ fn export_data(
         .arg("-X")
         .arg("-EUR")
         .arg("-H")
-        .arg(areport_type.to_string())
+        //.arg(areport_type.to_string())
+        .arg("bal")
         .arg("-b")
         .arg(get_daterange_from_quarter(aquarter, ayear, true))
         .arg("-e")
@@ -160,7 +162,6 @@ fn export_data(
         .output()
         .expect("Failed to execute process.");
     let mut output_string = String::from_utf8(output.stdout).unwrap();
-    println!("output = {}", &output_string);
     println!("output = {}", output_string);
     generate_pdf(afile, &output_string);
 }
@@ -175,7 +176,7 @@ fn generate_pdf(afile: &str, aoutput: &str)
         )
         .unwrap();
     let text = "aeitonfweitqnoifwtnfo";
-    current_layer.use_text(text, 24, Mm(20.0), Mm(20.0), &font);
+    current_layer.use_text(aoutput, 12, Mm(20.0), Mm(277.0), &font);
     current_layer.begin_text_section();
     current_layer.set_font(&font, 33);
     current_layer.set_text_cursor(Mm(10.0), Mm(10.0));
