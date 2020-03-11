@@ -169,21 +169,26 @@ fn generate_pdf(afile: &str, aoutput: &str)
             File::open("/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf").unwrap(),
         )
         .unwrap();
-    let text = "aeitonfweitqnoifwtnfo";
-    current_layer.use_text(aoutput, 12, Mm(20.0), Mm(277.0), &font);
+    let text = "kakkerdekak";
     current_layer.begin_text_section();
-    current_layer.set_font(&font, 33);
-    current_layer.set_text_cursor(Mm(10.0), Mm(10.0));
-    current_layer.set_line_height(33);
-    current_layer.set_word_spacing(3000);
-    current_layer.set_character_spacing(10);
-    current_layer.set_text_rendering_mode(TextRenderingMode::Stroke);
-    current_layer.write_text(aoutput.clone(), &font);
-    current_layer.set_line_offset(10);
-    current_layer.write_text(aoutput.clone(), &font);
-    current_layer.end_text_section();
+    current_layer.set_font(&font, 14);
+    current_layer.set_text_cursor(Mm(10.0), Mm(270.0));
+    // current_layer.set_line_height(33);
+    // current_layer.set_word_spacing(3000);
+    // current_layer.set_character_spacing(10);
+    write_lines_to_pdf(&current_layer, &font, aoutput.split("\n").collect());
     doc.save(&mut BufWriter::new(File::create("test.pdf").unwrap()))
         .unwrap();
+}
+
+fn write_lines_to_pdf(alayer: &PdfLayerReference, afont: &IndirectFontRef, alines: Vec<&str>)
+{
+    for i in 0..alines.len()
+    {
+        println!("=== {}: {}", i, alines[i]);
+        alayer.write_text(alines[i].clone(), &afont);
+        alayer.add_line_break();
+    }
 }
 
 #[cfg(test)]
