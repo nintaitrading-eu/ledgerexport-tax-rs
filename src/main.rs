@@ -133,19 +133,14 @@ fn export_data(
     ayear: i32,
 )
 {
-    // TODO: add the following command.
-    // Find a good way to use pipes?
-    // Or do the sorting in rust?
-    //--strict -X -EUR -H {daterange} reg | sort -n
-    println!(
-        "first-part: {}",
-        get_daterange_from_quarter(aquarter, ayear, true)
-    );
-    println!(
-        "first-part: {}",
-        get_daterange_from_quarter(aquarter, ayear, false)
-    );
-    println!("report_type = {}", areport_type.to_string());
+    let report_type = if areport_type == rt::ReportType::Balance
+    {
+        "bal"
+    }
+    else
+    {
+        "reg"
+    };
     let output = Command::new("ledger")
         .arg("-f")
         .arg(afile)
@@ -153,8 +148,7 @@ fn export_data(
         .arg("-X")
         .arg("-EUR")
         .arg("-H")
-        //.arg(areport_type.to_string())
-        .arg("bal")
+        .arg(report_type)
         .arg("-b")
         .arg(get_daterange_from_quarter(aquarter, ayear, true))
         .arg("-e")
