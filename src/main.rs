@@ -29,6 +29,13 @@ Options:
     -h --help  Show this screen.
     --version  Show version.
 ";
+const LINEHEIGHT: i64 = 20;
+const CURSOR_X: f64 = 10.0;
+const CURSOR_Y: f64 = 270.0;
+const FONT: &'static str = "/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf";
+const FONTSIZE: i64 = 14;
+const DIMENSION_X: f64 = 210.0;
+const DIMENSION_Y: f64 = 297.0;
 //const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 
 fn main()
@@ -161,19 +168,13 @@ fn export_data(
 
 fn generate_pdf(afile: &str, aoutput: &str)
 {
-    let (doc, page1, layer1) = PdfDocument::new("report", Mm(210.0), Mm(297.0), "layer_1");
+    let (doc, page1, layer1) =
+        PdfDocument::new("report", Mm(DIMENSION_X), Mm(DIMENSION_Y), "layer_1");
     let current_layer = doc.get_page(page1).get_layer(layer1);
-    let font = doc
-        .add_external_font(
-            File::open("/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf").unwrap(),
-        )
-        .unwrap();
-    let text = "kakkerdekak";
+    let font = doc.add_external_font(File::open(FONT).unwrap()).unwrap();
     current_layer.begin_text_section();
-    current_layer.set_font(&font, 14);
-    current_layer.set_text_cursor(Mm(10.0), Mm(270.0));
-    // current_layer.set_word_spacing(3000);
-    // current_layer.set_character_spacing(10);
+    current_layer.set_font(&font, FONTSIZE);
+    current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y));
     write_lines_to_pdf(&current_layer, &font, aoutput.split("\n").collect());
     doc.save(&mut BufWriter::new(File::create("test.pdf").unwrap()))
         .unwrap();
@@ -181,7 +182,7 @@ fn generate_pdf(afile: &str, aoutput: &str)
 
 fn write_lines_to_pdf(alayer: &PdfLayerReference, afont: &IndirectFontRef, alines: Vec<&str>)
 {
-    alayer.set_line_height(33);
+    alayer.set_line_height(LINEHEIGHT);
     for i in 0..alines.len()
     {
         alayer.write_text(alines[i].clone(), &afont);
