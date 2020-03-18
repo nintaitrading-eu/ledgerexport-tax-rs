@@ -4,10 +4,10 @@ pub mod rt
     use std::string::ParseError;
     use std::fmt::{self, Debug};
 
-    trait ToLedgerParam
+    pub trait ToLedgerParam
     {
         type Err = ParseError;
-        fn to_ledger_param(&self) -> String;
+        fn to_ledger_param(&self) -> &str;
     }
 
     #[derive(Debug, PartialEq)]
@@ -40,12 +40,12 @@ pub mod rt
      */
     impl ToLedgerParam for ReportType
     {
-        fn to_ledger_param(&self) -> String
+        fn to_ledger_param(&self) -> &str 
         {
             match self
             {
-                Balance => "bal".to_string(),
-                Register => "reg".to_string(),
+                ReportType::Balance => "bal",
+                ReportType::Register => "reg",
             }
         }
     }
