@@ -190,8 +190,12 @@ fn add_output_suffix(aoutput_file: &str, aoutput_type: &ot::OutputType) -> Strin
 #[post(ret == "pdf" || ret == "txt" || ret == "", "Returned extension should be one of txt, pdf or an empty string.")]
 fn ext_from_output_type(aoutput_type: ot::OutputType) -> String
 {
-    // TODO: match outputType and return txt, pdf or an empty string for stdOut.
-    "pdf".to_string()
+    match aoutput_type
+    {
+        ot::OutputType::Pdf => "pdf",
+        ot::OutputType::Txt => "txt",
+        ot::OutputType::Stdout => "",
+    }.to_string()
 }
 
 fn generate_pdf(aoutput: &str, aoutput_file: &str)
