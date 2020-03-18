@@ -16,14 +16,15 @@ const USAGE: &'static str = "
 Ledgerexport-tax
 
 Usage:
-    ledgerexport-tax --file=<file_name> --report=<bal|reg> --quarter=<1|2|3|4> [--year=<year>] [--output=<stdout|txt|pdf>]
+    ledgerexport-tax --ledger_file=<ledger_file> --report_type=<bal|reg> --quarter=<1|2|3|4> [--year=<year>] [--output_type=<stdout|txt|pdf>] [--output_file=<output_file>]
     ledgerexport-tax (-h | --help)
     ledgerexport-tax --version
 
 Options:
-    --file=<file_name>  Ledger dat filename to use.
-    --report=<bal|reg>  Specify bal (balance) or reg (register) report type.
+    --ledger_file=<ledger_file>  Ledger filename to use.
+    --report_type=<bal|reg>  Specify bal (balance) or reg (register) report type.
     --output=<stdout|txt|pdf>  Specify the output, stdout is the default.
+    --output_file=<output_file>  Output filename.
     --quarter=<quarter>  Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
     --year=<year>  Optional year. If no year is given, the current year is used.
     -h --help  Show this screen.
@@ -36,6 +37,7 @@ const FONT: &'static str = "/usr/local/share/fonts/inconsolata/Inconsolata-Regul
 const FONTSIZE: i64 = 14;
 const DIMENSION_X: f64 = 210.0;
 const DIMENSION_Y: f64 = 297.0;
+const DEFAULT_OUTPUT_FILENAME: &'static str = "report";
 //const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 
 fn main()
@@ -53,32 +55,39 @@ fn main()
         std::process::exit(0);
     }
 
-    let file = args.get_str("--file");
-    if !(file.len() > 0) || !Path::new(file).exists()
+    let ledger_file = args.get_str("--ledger_file");
+    if !(ledger_file.len() > 0) || !Path::new(ledger_file).exists()
     {
-        println!("File {} not found.", file);
+        println!("File {} not found.", ledger_file);
         std::process::exit(1);
     };
 
-    let report_type = match args.get_str("--report").parse::<rt::ReportType>()
+    let report_type = match args.get_str("--report_type").parse::<rt::ReportType>()
     {
         Ok(r) => r,
         Err(_) =>
         {
-            println!("Invalid report type {}.", args.get_str("--report"));
+            println!("Invalid report type {}.", args.get_str("--report_type"));
             std::process::exit(1);
         }
     };
 
-    let output_type = match args.get_str("--output").parse::<ot::OutputType>()
+    let output_type = match args.get_str("--output_type").parse::<ot::OutputType>()
     {
         Ok(o) => o,
         Err(_) =>
         {
-            println!("Invalid output type {}.", args.get_str("--output"));
+            println!("Invalid output type {}.", args.get_str("--output_type"));
             std::process::exit(1);
         }
     };
+
+    let mut output_file = args.get_str("--output_file");
+    if !(output_file.len() > 0)
+    {
+        output_file = DEFAULT_OUTPUT_FILENAME;
+    };
+    add_output_suffix(output_file, &output_type);
 
     let current_year: i32 = Utc::now().year();
     let year = match args.get_str("--year").parse::<i32>()
@@ -102,7 +111,7 @@ fn main()
         std::process::exit(1);
     }
 
-    export_data(file, output_type, report_type, quarter, year);
+    export_data(ledger_file, output_type, output_file, report_type, quarter, year);
     std::process::exit(0);
 }
 
@@ -128,16 +137,17 @@ fn get_daterange_from_quarter(aquarter: i32, ayear: i32, a_is_first_part: bool) 
     }
 }
 
-#[pre(!afile.is_empty(), "afile should not be empty")]
+#[pre(!aledger_file.is_empty(), "afile should not be empty")]
 #[pre(aquarter > 0, "aquarter should be a positive integer")]
 #[pre(ayear > 0, "ayear should be a positive integer")]
 #[pre((areport_type == rt::ReportType::Balance) || (areport_type == rt::ReportType::Register), "areport_type should be one of the known values")]
 fn export_data(
-    afile: &str,
+    aledger_file: &str,
     aoutput_type: ot::OutputType,
+    aoutput_file: &str,
     areport_type: rt::ReportType,
     aquarter: i32,
-    ayear: i32,
+    ayear: i32
 )
 {
     let report_type = if areport_type == rt::ReportType::Balance
@@ -150,7 +160,7 @@ fn export_data(
     };
     let output = Command::new("ledger")
         .arg("-f")
-        .arg(afile)
+        .arg(aledger_file)
         .arg("--strict")
         .arg("-X")
         .arg("-EUR")
@@ -163,10 +173,28 @@ fn export_data(
         .output()
         .expect("Failed to execute process.");
     let mut output_string = String::from_utf8(output.stdout).unwrap();
-    generate_pdf(afile, &output_string);
+    if aoutput_type == ot::OutputType::Pdf
+    {
+        generate_pdf(&output_string, aoutput_file);
+    }
 }
 
-fn generate_pdf(afile: &str, aoutput: &str)
+fn add_output_suffix(aoutput_file: &str, aoutput_type: &ot::OutputType) -> String
+{
+    // TODO: determine extension, based on OutputType
+    // TODO: add suffix _v1_YYYYMMDD.ext
+    aoutput_file.to_string()
+}
+
+#[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]
+#[post(ret == "pdf" || ret == "txt" || ret == "", "Returned extension should be one of txt, pdf or an empty string.")]
+fn ext_from_output_type(aoutput_type: ot::OutputType) -> String
+{
+    // TODO: match outputType and return txt, pdf or an empty string for stdOut.
+    "pdf".to_string()
+}
+
+fn generate_pdf(aoutput: &str, aoutput_file: &str)
 {
     let (doc, page1, layer1) =
         PdfDocument::new("report", Mm(DIMENSION_X), Mm(DIMENSION_Y), "layer_1");
@@ -176,7 +204,7 @@ fn generate_pdf(afile: &str, aoutput: &str)
     current_layer.set_font(&font, FONTSIZE);
     current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y));
     write_lines_to_pdf(&current_layer, &font, aoutput.split("\n").collect());
-    doc.save(&mut BufWriter::new(File::create("test.pdf").unwrap()))
+    doc.save(&mut BufWriter::new(File::create(aoutput_file).unwrap()))
         .unwrap();
 }
 
