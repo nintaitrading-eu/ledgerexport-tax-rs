@@ -14,9 +14,9 @@ pub mod rt
     {
         type Err = ();
 
-        fn from_str(a_str: &str) -> Result<Self, Self::Err>
+        fn from_str(astr: &str) -> Result<Self, Self::Err>
         {
-            match a_str
+            match astr
             {
                 "balance" => Ok(ReportType::Balance),
                 "bal" => Ok(ReportType::Balance),
