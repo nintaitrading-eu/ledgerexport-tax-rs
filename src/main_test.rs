@@ -10,6 +10,13 @@ fn test_daterange_from_quarter()
 }
 
 #[test]
+fn test_add_output_suffix()
+{
+    assert_eq!(add_output_suffix("myoutputfilename", &ot::OutputType::Pdf), "myoutputfilename");
+    // assert_eq!(add_output_suffix("", "default-value"));
+}
+
+#[test]
 fn test_ext_from_output_type()
 {
     assert_eq!(ext_from_output_type(ot::OutputType::Pdf), "pdf");
