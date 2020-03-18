@@ -1,7 +1,14 @@
 pub mod rt
 {
     use std::str::FromStr;
+    use std::string::ParseError;
     use std::fmt::{self, Debug};
+
+    trait ToLedgerParam
+    {
+        type Err = ParseError;
+        fn to_ledger_param(&self) -> String;
+    }
 
     #[derive(Debug, PartialEq)]
     pub enum ReportType
@@ -23,6 +30,22 @@ pub mod rt
                 "register" => Ok(ReportType::Register),
                 "reg" => Ok(ReportType::Register),
                 _ => Err(()),
+            }
+        }
+    }
+
+    /* The strings "bal" and "reg" are used in the ledger cli application
+     * as a cli parameter. We use this trait to convert the enum to
+     * these exact strings.
+     */
+    impl ToLedgerParam for ReportType
+    {
+        fn to_ledger_param(&self) -> String
+        {
+            match self
+            {
+                Balance => "bal".to_string(),
+                Register => "reg".to_string(),
             }
         }
     }

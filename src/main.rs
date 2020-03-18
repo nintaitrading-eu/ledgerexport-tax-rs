@@ -1,3 +1,4 @@
+#![feature(associated_type_defaults)]
 mod enums;
 
 use docopt::Docopt;
@@ -37,7 +38,6 @@ const FONT: &'static str = "/usr/local/share/fonts/inconsolata/Inconsolata-Regul
 const FONTSIZE: i64 = 14;
 const DIMENSION_X: f64 = 210.0;
 const DIMENSION_Y: f64 = 297.0;
-const DEFAULT_OUTPUT_FILENAME: &'static str = "report";
 //const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 
 fn main()
@@ -85,7 +85,7 @@ fn main()
     let mut output_file = args.get_str("--output_file");
     if !(output_file.len() > 0)
     {
-        output_file = DEFAULT_OUTPUT_FILENAME;
+        output_file = &output_type.to_string();
     };
     add_output_suffix(output_file, &output_type);
 
@@ -150,14 +150,7 @@ fn export_data(
     ayear: i32
 )
 {
-    let report_type = if areport_type == rt::ReportType::Balance
-    {
-        "bal"
-    }
-    else
-    {
-        "reg"
-    };
+    let report_type = areport_type.to_ledger_param();
     let output = Command::new("ledger")
         .arg("-f")
         .arg(aledger_file)
@@ -179,9 +172,13 @@ fn export_data(
     }
 }
 
+#[pre(!aoutput_file.is_empty(), "Output file should not be empty.")]
+#[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]
+#[post(!ret.is_empty(), "Should return a non-empty string.")]
 fn add_output_suffix(aoutput_file: &str, aoutput_type: &ot::OutputType) -> String
 {
     // TODO: determine extension, based on OutputType
+    
     // TODO: add suffix _v1_YYYYMMDD.ext
     aoutput_file.to_string()
 }
