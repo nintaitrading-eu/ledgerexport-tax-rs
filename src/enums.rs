@@ -7,7 +7,7 @@ pub mod rt
     pub trait ToLedgerParam
     {
         type Err = ParseError;
-        fn to_ledger_param(&self) -> &str;
+        fn to_ledger_param(&self) -> String;
     }
 
     #[derive(Debug, PartialEq)]
@@ -40,12 +40,12 @@ pub mod rt
      */
     impl ToLedgerParam for ReportType
     {
-        fn to_ledger_param(&self) -> &str 
+        fn to_ledger_param(&self) -> String
         {
             match self
             {
-                ReportType::Balance => "bal",
-                ReportType::Register => "reg",
+                ReportType::Balance => "bal".to_string(),
+                ReportType::Register => "reg".to_string(),
             }
         }
     }
@@ -69,10 +69,10 @@ pub mod ot
     {
         Stdout,
         Txt,
-        Pdf
+        Pdf,
     }
 
-    impl FromStr for OutputType 
+    impl FromStr for OutputType
     {
         type Err = ();
 

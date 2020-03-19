@@ -82,12 +82,12 @@ fn main()
         }
     };
 
-    let mut output_file = args.get_str("--output_file");
+    let mut output_file = args.get_str("--output_file").to_string();
     if !(output_file.len() > 0)
     {
-        output_file = &output_type.to_string();
+        output_file = output_type.to_string();
     };
-    add_output_suffix(output_file, &output_type);
+    add_output_suffix(&output_file, &output_type);
 
     let current_year: i32 = Utc::now().year();
     let year = match args.get_str("--year").parse::<i32>()
@@ -111,7 +111,14 @@ fn main()
         std::process::exit(1);
     }
 
-    export_data(ledger_file, output_type, output_file, report_type, quarter, year);
+    export_data(
+        ledger_file,
+        output_type,
+        &output_file,
+        report_type,
+        quarter,
+        year,
+    );
     std::process::exit(0);
 }
 
@@ -147,7 +154,7 @@ fn export_data(
     aoutput_file: &str,
     areport_type: rt::ReportType,
     aquarter: i32,
-    ayear: i32
+    ayear: i32,
 )
 {
     let report_type = areport_type.to_ledger_param();
@@ -178,7 +185,7 @@ fn export_data(
 fn add_output_suffix(aoutput_file: &str, aoutput_type: &ot::OutputType) -> String
 {
     // TODO: determine extension, based on OutputType
-    
+
     // TODO: add suffix _v1_YYYYMMDD.ext
     aoutput_file.to_string()
 }
@@ -192,7 +199,8 @@ fn ext_from_output_type(aoutput_type: ot::OutputType) -> String
         ot::OutputType::Pdf => "pdf",
         ot::OutputType::Txt => "txt",
         ot::OutputType::Stdout => "",
-    }.to_string()
+    }
+    .to_string()
 }
 
 fn generate_pdf(aoutput: &str, aoutput_file: &str)
