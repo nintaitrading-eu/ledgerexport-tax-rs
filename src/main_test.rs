@@ -12,8 +12,15 @@ fn test_daterange_from_quarter()
 #[test]
 fn test_add_output_suffix()
 {
-    assert_eq!(add_output_suffix("myoutputfilename", &ot::OutputType::Pdf), "myoutputfilename");
-    // assert_eq!(add_output_suffix("", "default-value"));
+    assert_eq!(
+        add_output_suffix(
+            "myoutputfilename",
+            &rt::ReportType::Balance,
+            &ot::OutputType::Pdf,
+            &2
+        ),
+        "bal_YYYYMMDD_v1_myoutputfilename_Q2" // TODO: fix date and extension, when fixed in code
+    );
 }
 
 #[test]

@@ -82,20 +82,6 @@ fn main()
         }
     };
 
-    let mut output_file = args.get_str("--output_file").to_string();
-    if !(output_file.len() > 0)
-    {
-        output_file = output_type.to_string();
-    };
-    add_output_suffix(&output_file, &output_type);
-
-    let current_year: i32 = Utc::now().year();
-    let year = match args.get_str("--year").parse::<i32>()
-    {
-        Ok(num) => num,
-        Err(_) => current_year,
-    };
-
     let quarter = match args.get_str("--quarter").parse::<i32>()
     {
         Ok(num) => num,
@@ -110,6 +96,20 @@ fn main()
         println!("Invalid quarter: {}", quarter);
         std::process::exit(1);
     }
+
+    let mut output_file = args.get_str("--output_file").to_string();
+    if !(output_file.len() > 0)
+    {
+        output_file = output_type.to_string();
+    };
+    add_output_suffix(&output_file, &report_type, &output_type, &quarter);
+
+    let current_year: i32 = Utc::now().year();
+    let year = match args.get_str("--year").parse::<i32>()
+    {
+        Ok(num) => num,
+        Err(_) => current_year,
+    };
 
     export_data(
         ledger_file,
@@ -180,14 +180,28 @@ fn export_data(
 }
 
 #[pre(!aoutput_file.is_empty(), "Output file should not be empty.")]
+#[pre(!areport_type.to_string().is_empty(), "ReportType should not be empty.")]
 #[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]
+#[pre((1..5).contains(aquarter), "Quarter should be valid.")]
 #[post(!ret.is_empty(), "Should return a non-empty string.")]
-fn add_output_suffix(aoutput_file: &str, aoutput_type: &ot::OutputType) -> String
+fn add_output_suffix(
+    aoutput_file: &str,
+    areport_type: &rt::ReportType,
+    aoutput_type: &ot::OutputType,
+    aquarter: &i32,
+) -> String
 {
     // TODO: determine extension, based on OutputType
 
     // TODO: add suffix _v1_YYYYMMDD.ext
-    aoutput_file.to_string()
+    // TODO: remove extension from filename
+    format!(
+        "{}_{}_v1_{}_Q{}",
+        areport_type.to_ledger_param(),
+        "YYYYMMDD", /* TODO: current date */
+        aoutput_file.to_string(),
+        aquarter
+    )
 }
 
 #[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]
