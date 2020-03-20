@@ -102,7 +102,7 @@ fn main()
     {
         output_file = output_type.to_string();
     };
-    add_output_suffix(&output_file, &report_type, &output_type, &quarter);
+    output_file = add_output_suffix(&output_file, &report_type, &output_type, &quarter);
 
     let current_year: i32 = Utc::now().year();
     let year = match args.get_str("--year").parse::<i32>()
