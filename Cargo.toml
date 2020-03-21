@@ -5,7 +5,7 @@ authors = ["Andy Nagels <thereisanewway@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-docopt = "1"
+docopt = "=1.0.2"
 chrono = "0.4"
 contracts = "0.3.0"
 printpdf = "0.2.8"
