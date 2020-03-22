@@ -2,7 +2,7 @@
 mod enums;
 
 use docopt::Docopt;
-use enums::{rt, ot, rt::ToLedgerParam};
+use enums::{rt, ot, rt::ToLedgerParam, ot::ToFileExtension};
 use std::process::Command;
 use chrono::prelude::{Utc, Datelike};
 use std::path::Path;

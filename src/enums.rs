@@ -95,4 +95,22 @@ pub mod ot
             fmt::Debug::fmt(self, f)
         }
     }
+
+    /* The output-types map to a file extension.
+     * Pdf = .pdf
+     * Txt = .txt
+     * All others = empty string
+     */
+    impl ToFileExtension for OutputType
+    {
+        fn to_file_extension(&self) -> String
+        {
+            match self
+            {
+                OutputType::Pdf => ".pdf".to_string(),
+                OutputType::Txt => ".txt".to_string(),
+                _ => "".to_string(),
+            }
+        }
+    }
 }
