@@ -163,13 +163,13 @@ fn export_data(
         .arg(aledger_file)
         .arg("--strict")
         .arg("-X")
-        .arg("-EUR")
-        .arg("-H")
+        .arg("EUR")
         .arg(report_type)
         .arg("-b")
         .arg(get_daterange_from_quarter(aquarter, ayear, true))
         .arg("-e")
         .arg(get_daterange_from_quarter(aquarter, ayear, false))
+        .arg("assets:current_assets")
         .output()
         .expect("Failed to execute process.");
     let mut output_string = String::from_utf8(output.stdout).unwrap();
