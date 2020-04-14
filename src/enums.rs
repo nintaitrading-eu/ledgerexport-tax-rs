@@ -101,7 +101,7 @@ pub mod ot
      * Txt = .txt
      * All others = empty string
      */
-    impl ToFileExtension for OutputType
+    /*impl ToFileExtension for OutputType
     {
         fn to_file_extension(&self) -> String
         {
@@ -112,5 +112,5 @@ pub mod ot
                 _ => "".to_string(),
             }
         }
-    }
+    }*/
 }
