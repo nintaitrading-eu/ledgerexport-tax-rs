@@ -12,6 +12,7 @@ fn test_daterange_from_quarter()
 #[test]
 fn test_add_output_suffix()
 {
+    let current_date = Utc::now();
     assert_eq!(
         add_output_suffix(
             "myoutputfilename",
@@ -19,14 +20,14 @@ fn test_add_output_suffix()
             &ot::OutputType::Pdf,
             &2
         ),
-        "bal_YYYYMMDD_v1_myoutputfilename_Q2" // TODO: fix date and extension, when fixed in code
+        format!("bal_{}_v1_myoutputfilename_Q2.pdf", current_date.format("%Y%m%d"))
     );
 }
 
 #[test]
 fn test_ext_from_output_type()
 {
-    assert_eq!(ext_from_output_type(ot::OutputType::Pdf), "pdf");
-    assert_eq!(ext_from_output_type(ot::OutputType::Txt), "txt");
-    assert_eq!(ext_from_output_type(ot::OutputType::Stdout), "");
+    assert_eq!(ext_from_output_type(&ot::OutputType::Pdf), "pdf");
+    assert_eq!(ext_from_output_type(&ot::OutputType::Txt), "txt");
+    assert_eq!(ext_from_output_type(&ot::OutputType::Stdout), "");
 }
