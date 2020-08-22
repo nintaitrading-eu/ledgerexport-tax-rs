@@ -33,11 +33,11 @@ Options:
 ";
 const LINEHEIGHT: i64 = 20;
 const CURSOR_X: f64 = 10.0;
-const CURSOR_Y: f64 = 270.0;
+const CURSOR_Y: f64 = 200.0;
 const FONT: &'static str = "/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf";
-const FONTSIZE: i64 = 14;
-const DIMENSION_X: f64 = 210.0;
-const DIMENSION_Y: f64 = 297.0;
+const FONTSIZE: i64 = 12;
+const DIMENSION_X: f64 = 297.0;
+const DIMENSION_Y: f64 = 210.0;
 //const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 
 fn main()
@@ -164,6 +164,7 @@ fn export_data(
         .arg("--strict")
         .arg("-X")
         .arg("EUR")
+        .arg("-H")
         .arg(report_type)
         /* TODO: the -b option should only be for the reg report */
         .arg("-b")
@@ -219,26 +220,43 @@ fn ext_from_output_type(aoutput_type: &ot::OutputType) -> String
 
 fn generate_pdf(aoutput: &str, aoutput_file: &str)
 {
+    // document
     let (doc, page1, layer1) =
-        PdfDocument::new("report", Mm(DIMENSION_X), Mm(DIMENSION_Y), "layer_1");
-    let current_layer = doc.get_page(page1).get_layer(layer1);
+        PdfDocument::new("report", Mm(DIMENSION_X), Mm(DIMENSION_Y), "page_1-layer_1");
     let font = doc.add_external_font(File::open(FONT).unwrap()).unwrap();
+
+    // data to write
+    let lines: Vec<&str> = aoutput.split("\n").collect();
+
+    // write text to pages
+    let mut current_layer = doc.get_page(page1).get_layer(layer1);
     current_layer.begin_text_section();
     current_layer.set_font(&font, FONTSIZE);
     current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y));
-    write_lines_to_pdf(&current_layer, &font, aoutput.split("\n").collect());
+    for i in 0..lines.len()
+    {
+        println!("DEBUG ::: {}", lines[i].clone());
+        if (i % 25 == 0) && (i > 0)
+        {
+            current_layer.end_text_section();
+            let (page2, layer1) = doc.add_page(Mm(DIMENSION_X), Mm(DIMENSION_Y), format!("page_{}-layer_1", i));
+            current_layer = doc.get_page(page2).get_layer(layer1);
+            current_layer.begin_text_section();
+            current_layer.set_font(&font, FONTSIZE);
+            current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y));
+        }
+        write_line_to_pdf(&current_layer, &font, lines[i].clone());
+    }
+    current_layer.end_text_section();
     doc.save(&mut BufWriter::new(File::create(aoutput_file).unwrap()))
         .unwrap();
 }
 
-fn write_lines_to_pdf(alayer: &PdfLayerReference, afont: &IndirectFontRef, alines: Vec<&str>)
+fn write_line_to_pdf(alayer: &PdfLayerReference, afont: &IndirectFontRef, alinetext: &str)
 {
     alayer.set_line_height(LINEHEIGHT);
-    for i in 0..alines.len()
-    {
-        alayer.write_text(alines[i].clone(), &afont);
-        alayer.add_line_break();
-    }
+    alayer.write_text(alinetext, &afont);
+    alayer.add_line_break();
 }
 
 #[cfg(test)]
