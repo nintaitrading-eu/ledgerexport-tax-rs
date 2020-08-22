@@ -33,7 +33,7 @@ Options:
 ";
 const LINEHEIGHT: i64 = 20;
 const CURSOR_X: f64 = 10.0;
-const CURSOR_Y: f64 = 200.0;
+const CURSOR_Y: f64 = 180.0;
 const FONT: &'static str = "/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf";
 const FONTSIZE: i64 = 12;
 const DIMENSION_X: f64 = 297.0;
@@ -177,7 +177,7 @@ fn export_data(
     let mut output_string = String::from_utf8(output.stdout).unwrap();
     if aoutput_type == ot::OutputType::Pdf
     {
-        generate_pdf(&output_string, aoutput_file);
+        generate_pdf(&output_string, aoutput_file, areport_type, ayear, aquarter);
     }
 }
 
@@ -218,7 +218,12 @@ fn ext_from_output_type(aoutput_type: &ot::OutputType) -> String
     .to_string()
 }
 
-fn generate_pdf(aoutput: &str, aoutput_file: &str)
+fn generate_pdf(
+    aoutput: &str,
+    aoutput_file: &str,
+    areport_type: rt::ReportType,
+    ayear: i32,
+    aquarter: i32)
 {
     // document
     let (doc, page1, layer1) =
@@ -229,13 +234,27 @@ fn generate_pdf(aoutput: &str, aoutput_file: &str)
     let lines: Vec<&str> = aoutput.split("\n").collect();
 
     // write text to pages
+    // -- title
     let mut current_layer = doc.get_page(page1).get_layer(layer1);
     current_layer.begin_text_section();
     current_layer.set_font(&font, FONTSIZE);
+    current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y) + Mm(20.0));
+    let title = format!("{} report for {}-Q{}", areport_type.to_string(), ayear, aquarter);
+    write_line_to_pdf(&current_layer, &font, &title);
+    current_layer.end_text_section();
+    // -- underline
+    current_layer.begin_text_section();
+    current_layer.set_font(&font, FONTSIZE);
+    current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y) + Mm(15.0));
+    let underline = "-".repeat(title.len());
+    write_line_to_pdf(&current_layer, &font, &underline);
+    current_layer.end_text_section();
+
+    // -- details
+    current_layer.begin_text_section();
     current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y));
     for i in 0..lines.len()
     {
-        println!("DEBUG ::: {}", lines[i].clone());
         if (i % 25 == 0) && (i > 0)
         {
             current_layer.end_text_section();
