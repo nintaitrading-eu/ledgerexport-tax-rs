@@ -165,6 +165,7 @@ fn export_data(
         .arg("-X")
         .arg("EUR")
         .arg(report_type)
+        /* TODO: the -b option should only be for the reg report */
         .arg("-b")
         .arg(get_daterange_from_quarter(aquarter, ayear, true))
         .arg("-e")
@@ -191,22 +192,21 @@ fn add_output_suffix(
     aquarter: &i32,
 ) -> String
 {
-    // TODO: determine extension, based on OutputType
-
-    // TODO: add suffix _v1_YYYYMMDD.ext
-    // TODO: remove extension from filename
+    let ext = ext_from_output_type(aoutput_type);
+    // TODO: remove extension from filename, if one is given.
     format!(
-        "{}_{}_v1_{}_Q{}",
+        "{}_{}_v1_{}_Q{}.{}",
         areport_type.to_ledger_param(),
-        "YYYYMMDD", /* TODO: current date */
+        Utc::now().format("%Y%m%d"),
         aoutput_file.to_string(),
-        aquarter
+        aquarter,
+        ext_from_output_type(aoutput_type) 
     )
 }
 
 #[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]
 #[post(ret == "pdf" || ret == "txt" || ret == "", "Returned extension should be one of txt, pdf or an empty string.")]
-fn ext_from_output_type(aoutput_type: ot::OutputType) -> String
+fn ext_from_output_type(aoutput_type: &ot::OutputType) -> String
 {
     match aoutput_type
     {
