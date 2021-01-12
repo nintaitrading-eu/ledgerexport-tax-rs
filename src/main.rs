@@ -158,22 +158,41 @@ fn export_data(
 )
 {
     let report_type = areport_type.to_ledger_param();
-    let output = Command::new("ledger")
-        .arg("-f")
-        .arg(aledger_file)
-        .arg("--strict")
-        .arg("-X")
-        .arg("EUR")
-        .arg("-H")
-        .arg(report_type)
-        /* TODO: the -b option should only be for the reg report */
-        .arg("-b")
-        .arg(get_daterange_from_quarter(aquarter, ayear, true))
-        .arg("-e")
-        .arg(get_daterange_from_quarter(aquarter, ayear, false))
-        .arg("assets:current_assets")
-        .output()
-        .expect("Failed to execute process.");
+    let mut output;
+    if areport_type == rt::ReportType::Register
+    {
+        output = Command::new("ledger")
+            .arg("-f")
+            .arg(aledger_file)
+            .arg("--strict")
+            .arg("-X")
+            .arg("EUR")
+            .arg("-H")
+            .arg(report_type)
+            .arg("-b")
+            .arg(get_daterange_from_quarter(aquarter, ayear, true))
+            .arg("-e")
+            .arg(get_daterange_from_quarter(aquarter, ayear, false))
+            .arg("assets:current_assets")
+            .output()
+            .expect("Failed to execute process.");
+    }
+    else
+    {
+        output = Command::new("ledger")
+            .arg("-f")
+            .arg(aledger_file)
+            .arg("--strict")
+            .arg("-X")
+            .arg("EUR")
+            .arg(report_type)
+            .arg(get_daterange_from_quarter(aquarter, ayear, true))
+            .arg("-e")
+            .arg(get_daterange_from_quarter(aquarter, ayear, false))
+            .arg("assets:current_assets")
+            .output()
+            .expect("Failed to execute process.");
+    }
     let mut output_string = String::from_utf8(output.stdout).unwrap();
     if aoutput_type == ot::OutputType::Pdf
     {
