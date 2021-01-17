@@ -5,6 +5,7 @@ VERSION = 0.0.1
 
 # paths
 PREFIX = /usr/local
+TARGET = target/release
 # Note: the below will be /share/man on linux.
 MANPREFIX = ${PREFIX}/man
 INCLUDE = /usr/src/include
@@ -23,3 +24,4 @@ LIBS =
 
 # compiler and linker
 CC = cargo -v
+BUILD = --release
