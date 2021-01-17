@@ -28,12 +28,7 @@ fn test_add_output_suffix_no_output_file_given()
 {
     let current_date = Utc::now();
     assert_eq!(
-        add_output_suffix(
-            "",
-            &rt::ReportType::Balance,
-            &ot::OutputType::Pdf,
-            &2
-        ),
+        add_output_suffix("", &rt::ReportType::Balance, &ot::OutputType::Pdf, &2),
         format!("bal_{}_v1_Q2.pdf", current_date.format("%Y%m%d"))
     );
 }

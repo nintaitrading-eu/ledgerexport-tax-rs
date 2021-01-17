@@ -222,7 +222,8 @@ fn add_output_suffix(
             areport_type.to_ledger_param(),
             Utc::now().format("%Y%m%d"),
             aquarter,
-            ext)
+            ext
+        )
     }
 }
 
@@ -244,7 +245,8 @@ fn generate_pdf(
     aoutput_file: &str,
     areport_type: rt::ReportType,
     ayear: i32,
-    aquarter: i32)
+    aquarter: i32,
+)
 {
     // document
     let (doc, page1, layer1) =
@@ -260,7 +262,12 @@ fn generate_pdf(
     current_layer.begin_text_section();
     current_layer.set_font(&font, FONTSIZE);
     current_layer.set_text_cursor(Mm(CURSOR_X), Mm(CURSOR_Y) + Mm(20.0));
-    let title = format!("{} report for {}-Q{}", areport_type.to_string(), ayear, aquarter);
+    let title = format!(
+        "{} report for {}-Q{}",
+        areport_type.to_string(),
+        ayear,
+        aquarter
+    );
     write_line_to_pdf(&current_layer, &font, &title);
     current_layer.end_text_section();
     // -- underline
@@ -279,7 +286,11 @@ fn generate_pdf(
         if (i % 25 == 0) && (i > 0)
         {
             current_layer.end_text_section();
-            let (page2, layer1) = doc.add_page(Mm(DIMENSION_X), Mm(DIMENSION_Y), format!("page_{}-layer_1", i));
+            let (page2, layer1) = doc.add_page(
+                Mm(DIMENSION_X),
+                Mm(DIMENSION_Y),
+                format!("page_{}-layer_1", i),
+            );
             current_layer = doc.get_page(page2).get_layer(layer1);
             current_layer.begin_text_section();
             current_layer.set_font(&font, FONTSIZE);
