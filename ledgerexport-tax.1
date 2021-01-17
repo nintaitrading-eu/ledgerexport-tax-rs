@@ -1,0 +1,54 @@
+.TH LEDGEREXPORT-TAX 1 ledgerexport-tax\-VERSION
+.SH NAME
+ledgerexport-tax \- create gnuplot charts from ledger data
+.SH SYNOPSIS
+.B ledgerexport-tax
+.RB [ \-v ]
+.SH DEPENDS ON
+The cli ledger application called ledger.
+More info at http://www.ledger-cli.org/.
+Only version 3.0 is supported, not the 2.6.3 version.
+.SH DESCRIPTION
+ledgerexport-tax is a rust program, that calls the ledger application and parses it's output.
+A balance or register report is created.
+Options:
+    --ledger_file=<ledger_file>  Ledger filename to use.
+    --report_type=<bal|reg>  Specify bal (balance) or reg (register) report type.
+    --output=<stdout|txt|pdf>  Specify the output, stdout is the default.
+    --output_file=<output_file>  Output filename.
+    --quarter=<quarter>  Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
+    --year=<year>  Optional year. If no year is given, the current year is used.
+    -h --help  Show this screen.
+    --version  Show version.
+"
+.SH OPTIONS
+.TP
+.B \-h, \--help
+Shows usage information.
+.B \-v, \--version
+Prints version information to standard output, then exits.
+.B \-\-ledger_file=<ledger_file>
+Used to specify the ledger dat file to query.
+.B \-\-report_type=<bal|reg>
+Specify bal (balance) or reg (register) report type.
+.B \-\-output=<stdout|txt|pdf>
+Specify the output, stdout is the default.
+.B \-\-output_file=<output_file>
+Output filename
+.B \-\-quarter=<quarter>
+Export data for the given quarter of the current or given year, should be 1, 2, 3 or 4.
+.B \-\-year=<year>
+Optional year. If no year is given, the current year is used.
+.SH USAGE
+.SH SEE ALSO
+.BR ledger (1)
+.SH EXTRA INFO
+ledgerexport-tax creates a balance report, for the given quarter of the given year.
+It uses no begin-date.
+For the register report, it does use a begin-date, because only the transactions for the quarter
+need to be taken into account.
+.SH BUGS
+.SH EXAMPLES
+ledgerexport-tax --ledger_file=/home/johnny/ledger/ledger.dat --report_type=bal --output=pdf --quarter=4 --year=2021
+ledgerexport-tax --ledger_file=/home/johnny/ledger/ledger.dat --report_type=reg --output=pdf --quarter=4 --year=2021
+ledgerexport-tax --ledger_file=/home/johnny/ledger/ledger.dat --report_type=bal --output=txt --outup_file=bal_2021Q4.txt --quarter=4 --year=2021
