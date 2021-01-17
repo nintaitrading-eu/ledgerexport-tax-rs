@@ -2,7 +2,7 @@
 mod enums;
 
 use docopt::Docopt;
-use enums::{rt, ot, rt::ToLedgerParam/*, ot::ToFileExtension*/};
+use enums::{rt, ot, rt::ToLedgerParam};
 use std::process::Command;
 use chrono::prelude::{Utc, Datelike};
 use std::path::Path;
@@ -35,19 +35,15 @@ const LINEHEIGHT: i64 = 20;
 const CURSOR_X: f64 = 10.0;
 const CURSOR_Y: f64 = 180.0;
 const FONT: &'static str = "/usr/local/share/fonts/inconsolata/Inconsolata-Regular.ttf";
-const FONTSIZE: i64 = 12;
+const FONTSIZE: i64 = 8;
 const DIMENSION_X: f64 = 297.0;
 const DIMENSION_Y: f64 = 210.0;
-//const CMD_INCOMEVSEXPENSES_INCOME: &'static str = "ledger -f {file} --strict -j reg --real -X EUR -H ^income {period} --collapse --plot-amount-format=\"%(format_date(date, \"%Y-%m-%d\")) %(abs(quantity(scrub(display_amount))))\n";
 
 fn main()
 {
     let args = Docopt::new(USAGE)
         .and_then(|dopt| dopt.parse())
         .unwrap_or_else(|e| e.exit());
-    println!("--------- BEGIN DEBUG ------------");
-    println!("{:?}", args);
-    println!("--------- END DEBUG ------------");
 
     if args.get_bool("--version")
     {
