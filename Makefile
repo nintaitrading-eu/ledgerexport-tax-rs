@@ -27,7 +27,7 @@ dist: clean
 	@gzip ledgerexport-tax-${VERSION}.tar
 	@rm -rf ledgerexport-tax-${VERSION}
 
-install: all
+install:
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f ${TARGET}/ledgerexport-tax ${DESTDIR}${PREFIX}/bin
@@ -43,4 +43,4 @@ uninstall:
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/ledgerexport-tax.1
 
-.PHONY: all options clean dist install uninstall
+.PHONY: all clean dist install uninstall
