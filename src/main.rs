@@ -200,7 +200,6 @@ fn export_data(
     }
 }
 
-#[pre(!aoutput_file.is_empty(), "Output file should not be empty.")]
 #[pre(!areport_type.to_string().is_empty(), "ReportType should not be empty.")]
 #[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]
 #[pre((1..5).contains(aquarter), "Quarter should be valid.")]
@@ -212,16 +211,27 @@ fn add_output_suffix(
     aquarter: &i32,
 ) -> String
 {
+    // Remove extension from filename
     let ext = ext_from_output_type(aoutput_type);
-    // TODO: remove extension from filename, if one is given.
-    format!(
-        "{}_{}_v1_{}_Q{}.{}",
-        areport_type.to_ledger_param(),
-        Utc::now().format("%Y%m%d"),
-        aoutput_file.to_string(),
-        aquarter,
-        ext_from_output_type(aoutput_type) 
-    )
+    let output_file = aoutput_file
+        .to_string()
+        .to_lowercase()
+        .replace(&format!(".{}", ext), "");
+
+    // Use given output filename or assemble one.
+    if !output_file.is_empty()
+    {
+        format!("{}.{}", output_file, ext)
+    }
+    else
+    {
+        format!(
+            "{}_{}_v1_Q{}.{}",
+            areport_type.to_ledger_param(),
+            Utc::now().format("%Y%m%d"),
+            aquarter,
+            ext)
+    }
 }
 
 #[pre(!aoutput_type.to_string().is_empty(), "OutputType should not be empty.")]

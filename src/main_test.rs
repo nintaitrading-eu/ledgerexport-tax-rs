@@ -10,9 +10,8 @@ fn test_daterange_from_quarter()
 }
 
 #[test]
-fn test_add_output_suffix()
+fn test_add_output_suffix_output_file_given()
 {
-    let current_date = Utc::now();
     assert_eq!(
         add_output_suffix(
             "myoutputfilename",
@@ -20,7 +19,22 @@ fn test_add_output_suffix()
             &ot::OutputType::Pdf,
             &2
         ),
-        format!("bal_{}_v1_myoutputfilename_Q2.pdf", current_date.format("%Y%m%d"))
+        "myoutputfilename.pdf"
+    );
+}
+
+#[test]
+fn test_add_output_suffix_no_output_file_given()
+{
+    let current_date = Utc::now();
+    assert_eq!(
+        add_output_suffix(
+            "",
+            &rt::ReportType::Balance,
+            &ot::OutputType::Pdf,
+            &2
+        ),
+        format!("bal_{}_v1_Q2.pdf", current_date.format("%Y%m%d"))
     );
 }
 
